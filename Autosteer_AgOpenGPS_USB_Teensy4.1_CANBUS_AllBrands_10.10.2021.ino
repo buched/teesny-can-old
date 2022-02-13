@@ -35,6 +35,7 @@ uint8_t Brand = 1;
 //----------------------------------------------------------
 
   ////////////////// User Settings /////////////////////////  
+#define ESPSerial Serial3
 
   //How many degrees before decreasing Max PWM
   #define LOW_HIGH_DEGREES 5.0
@@ -215,7 +216,9 @@ boolean intendToSteer = 0;        //Do We Intend to Steer?
  
   void setup()
   {    
-    
+        while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
    //keep pulled high and drag low to activate, noise free safe   
     pinMode(WORKSW_PIN, INPUT_PULLUP); 
     pinMode(STEERSW_PIN, INPUT_PULLUP); 
@@ -228,10 +231,8 @@ boolean intendToSteer = 0;        //Do We Intend to Steer?
     Wire.begin();
     Serial.begin(38400);
     delay(1000);
-
-    while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+    // 115200 baud rate for the bt
+ESPSerial.begin(115200);
   
     //test if CMPS working
     uint8_t error;
@@ -820,7 +821,14 @@ boolean intendToSteer = 0;        //Do We Intend to Steer?
         if ( lastEnc) EncoderFunc();
       }
     }
-    
+if (Serial.available()) {
+char c = Serial.read();
+ESPSerial.write(c);
+}
+if (ESPSerial.available()) {
+char c = ESPSerial.read();
+Serial.write(c);
+}    
   } // end of main loop
 
   //ISR Steering Wheel Encoder
